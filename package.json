@@ -1,0 +1,23 @@
+{
+    "name": "hireme",
+    "version": "0.0.1",
+    "description": "",
+    "license": "UNLICENSED",
+    "type": "module",
+    "imports": {
+        "#now:*": "./@types/servicenow/fluent/*/index.js"
+    },
+    "scripts": {
+        "build": "now-sdk build",
+        "deploy": "now-sdk install",
+        "transform": "now-sdk transform",
+        "types": "now-sdk dependencies",
+        "test": "node --test tests/*.test.mjs",
+        "verify": "now-sdk build && node --test tests/*.test.mjs",
+        "clean": "now-sdk clean"
+    },
+    "devDependencies": {
+        "@servicenow/sdk": "4.11.2",
+        "@servicenow/glide": "27.0.5"
+    }
+}

@@ -1,0 +1,66 @@
+name: HireMe CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Compiles every .now.ts and validates the Fluent metadata.
+      # Runs fully offline - no instance credentials needed.
+      - name: Build Fluent sources
+        run: npm run build
+
+      - name: Unit tests (scoring engine)
+        run: npm test
+
+  # ---------------------------------------------------------------------
+  # Deploy + ATF. Disabled until instance credentials exist as repo secrets.
+  # Blueprint p.16/p.17: ATF green is a required check before promotion.
+  #
+  # To enable: add SN_INSTANCE_URL / SN_USERNAME / SN_PASSWORD secrets,
+  # then remove the `if: false` guard below.
+  # See `now-sdk explain ci-integration` for the supported auth flags.
+  # ---------------------------------------------------------------------
+  deploy-dev:
+    needs: build-and-test
+    if: false
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Authenticate
+        run: |
+          echo "${{ secrets.SN_PASSWORD }}" | npx now-sdk auth \
+            --add "${{ secrets.SN_INSTANCE_URL }}" \
+            --type basic \
+            --username "${{ secrets.SN_USERNAME }}" \
+            --password-stdin
+
+      - run: npm run build
+      - run: npm run deploy
+
+      - name: ATF regression suite
+        run: npx now-sdk cicd test-suite --name hireme-regression
