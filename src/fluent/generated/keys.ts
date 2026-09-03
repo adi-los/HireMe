@@ -693,6 +693,54 @@ declare global {
                         table: 'sys_module'
                         id: '89eae49da96544e5a31f8c2c9e7919e0'
                     }
+                    'src_server_ui-actions_application-actions_js': {
+                        table: 'sys_module'
+                        id: 'fe626c89950e4b6ea62722f921e664ee'
+                    }
+                    ui_action_accept: {
+                        table: 'sys_ui_action'
+                        id: 'afcae76d873c4559a3c1e3e718e6cc50'
+                    }
+                    ui_action_accept_layout_item: {
+                        table: 'sys_ux_form_action_layout_item'
+                        id: '86d3dee6b0c248118f082cafbb9b5f9e'
+                    }
+                    ui_action_add_note: {
+                        table: 'sys_ui_action'
+                        id: 'ee711b2d16ec4141a971001a75aa934c'
+                    }
+                    ui_action_add_note_layout_item: {
+                        table: 'sys_ux_form_action_layout_item'
+                        id: '5c80ffa1dc2546a0aa8b6f9ff0ff5db5'
+                    }
+                    ui_action_call: {
+                        table: 'sys_ui_action'
+                        id: 'a087e9704fda48109a87bcd270643026'
+                    }
+                    ui_action_call_layout_item: {
+                        table: 'sys_ux_form_action_layout_item'
+                        id: '45ad05699e974c728bb68dfa531e6700'
+                    }
+                    ui_action_reject: {
+                        table: 'sys_ui_action'
+                        id: 'fba8ee99968a44a5b113d44fbdc63786'
+                    }
+                    ui_action_reject_layout_item: {
+                        table: 'sys_ux_form_action_layout_item'
+                        id: '1158d37d6ce94ab2bd32b0c0a5c39e20'
+                    }
+                    ui_action_schedule_interview: {
+                        table: 'sys_ui_action'
+                        id: 'a6e14aeef48e4773b5999a3dbc48ff57'
+                    }
+                    ui_action_schedule_interview_layout_item: {
+                        table: 'sys_ux_form_action_layout_item'
+                        id: '67d1388b72434a319713f39b49bf2c98'
+                    }
+                    ui_page_cv_viewer_module: {
+                        table: 'sys_app_module'
+                        id: '62c30bcb17d642c984898de72ef9087f'
+                    }
                     widget_applications_total: {
                         table: 'par_dashboard_widget'
                         id: '9de2aaf3ed374689b00aae8b04165f5a'
@@ -852,6 +900,14 @@ declare global {
                             value: 'rejected'
                             language: 'en'
                             dependent_value: 'NULL'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: '0b4c9fac890c435eac864dd219590c7b'
+                        key: {
+                            name: 'x_winu_hireme_application'
+                            element: 'pending_note'
                         }
                     },
                     {
@@ -1140,11 +1196,37 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_action_role'
+                        id: '1e16e4a972ad414d9216f35815ad0236'
+                        key: {
+                            sys_ui_action: 'a6e14aeef48e4773b5999a3dbc48ff57'
+                            sys_user_role: {
+                                id: 'e15ef9cb95c24d45a70ca6a6726a2f17'
+                                key: {
+                                    name: 'x_winu_hireme.recruiter'
+                                }
+                            }
+                        }
+                    },
+                    {
                         table: 'sys_choice_set'
                         id: '1f18f2ec6aea422b8fcb90ddfcc31631'
                         key: {
                             name: 'x_winu_hireme_audit_log'
                             element: 'actor_type'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_action_role'
+                        id: '1f3b7d2b732346508fa8bbedb43b275c'
+                        key: {
+                            sys_ui_action: 'ee711b2d16ec4141a971001a75aa934c'
+                            sys_user_role: {
+                                id: '01621851ff6647998e25aefb11bac949'
+                                key: {
+                                    name: 'x_winu_hireme.admin'
+                                }
+                            }
                         }
                     },
                     {
@@ -1231,6 +1313,14 @@ declare global {
                         key: {
                             name: 'x_winu_hireme_candidate_profile'
                             element: 'data_confidence'
+                        }
+                    },
+                    {
+                        table: 'sn_glider_source_artifact_m2m'
+                        id: '24989cdde7a0415b8f85028934424688'
+                        key: {
+                            application_file: '6085d6dafa16459c9d245b38f8e8cf90'
+                            source_artifact: '98edc774a7e54a0ebf308b6317e6066e'
                         }
                     },
                     {
@@ -1332,6 +1422,19 @@ declare global {
                         key: {
                             name: 'x_winu_hireme_cv_document'
                             element: 'application_ref'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_action_role'
+                        id: '2e2bf124d40b4367a8a752991eec7435'
+                        key: {
+                            sys_ui_action: 'afcae76d873c4559a3c1e3e718e6cc50'
+                            sys_user_role: {
+                                id: 'e15ef9cb95c24d45a70ca6a6726a2f17'
+                                key: {
+                                    name: 'x_winu_hireme.recruiter'
+                                }
+                            }
                         }
                     },
                     {
@@ -1519,6 +1622,19 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_action_role'
+                        id: '3a2b9de7cfa745cb840c5975fc48b96a'
+                        key: {
+                            sys_ui_action: 'fba8ee99968a44a5b113d44fbdc63786'
+                            sys_user_role: {
+                                id: '01621851ff6647998e25aefb11bac949'
+                                key: {
+                                    name: 'x_winu_hireme.admin'
+                                }
+                            }
+                        }
+                    },
+                    {
                         table: 'sys_documentation'
                         id: '3a6ad20dc5c2429693c178c7a5ead2e5'
                         key: {
@@ -1536,6 +1652,19 @@ declare global {
                                 id: '01621851ff6647998e25aefb11bac949'
                                 key: {
                                     name: 'x_winu_hireme.admin'
+                                }
+                            }
+                        }
+                    },
+                    {
+                        table: 'sys_ui_action_role'
+                        id: '3b373e82a74d4c6e8177b67179d0b202'
+                        key: {
+                            sys_ui_action: 'fba8ee99968a44a5b113d44fbdc63786'
+                            sys_user_role: {
+                                id: 'e15ef9cb95c24d45a70ca6a6726a2f17'
+                                key: {
+                                    name: 'x_winu_hireme.recruiter'
                                 }
                             }
                         }
@@ -1621,6 +1750,19 @@ declare global {
                         key: {
                             name: 'x_winu_hireme_job_offer'
                             element: 'auto_interview_enabled'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_action_role'
+                        id: '421a6f80f34b4f7fa2c91ab42d99a8b9'
+                        key: {
+                            sys_ui_action: 'ee711b2d16ec4141a971001a75aa934c'
+                            sys_user_role: {
+                                id: 'e15ef9cb95c24d45a70ca6a6726a2f17'
+                                key: {
+                                    name: 'x_winu_hireme.recruiter'
+                                }
+                            }
                         }
                     },
                     {
@@ -1863,6 +2005,19 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_action_role'
+                        id: '5b4fc8a00ab84d0294f3a4bb8bc46c03'
+                        key: {
+                            sys_ui_action: 'a6e14aeef48e4773b5999a3dbc48ff57'
+                            sys_user_role: {
+                                id: '01621851ff6647998e25aefb11bac949'
+                                key: {
+                                    name: 'x_winu_hireme.admin'
+                                }
+                            }
+                        }
+                    },
+                    {
                         table: 'sys_security_acl_role'
                         id: '5b72481c232444a6b48d8f4128fe16a1'
                         key: {
@@ -1961,6 +2116,20 @@ declare global {
                             name: 'x_winu_hireme_audit_log'
                             element: 'timestamp'
                             language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_page'
+                        id: '6085d6dafa16459c9d245b38f8e8cf90'
+                        key: {
+                            endpoint: 'x_winu_hireme_cv_viewer.do'
+                        }
+                    },
+                    {
+                        table: 'sys_ux_form_action'
+                        id: '6159432b966f4740a4389ff99bd980e5'
+                        key: {
+                            ui_action: 'a6e14aeef48e4773b5999a3dbc48ff57'
                         }
                     },
                     {
@@ -2469,6 +2638,19 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_action_role'
+                        id: '8720057970f64c76ad88086c7b2f1f30'
+                        key: {
+                            sys_ui_action: 'a087e9704fda48109a87bcd270643026'
+                            sys_user_role: {
+                                id: 'e15ef9cb95c24d45a70ca6a6726a2f17'
+                                key: {
+                                    name: 'x_winu_hireme.recruiter'
+                                }
+                            }
+                        }
+                    },
+                    {
                         table: 'sys_documentation'
                         id: '875c603de9174f4591b5be25fd1e0797'
                         key: {
@@ -2611,6 +2793,13 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ux_lib_asset'
+                        id: '921314a8d6384b01af8d732498639817'
+                        key: {
+                            name: 'x_winu_hireme/main'
+                        }
+                    },
+                    {
                         table: 'sys_dictionary'
                         id: '931a3765b0a54f97b9fc2b5a05b5e895'
                         key: {
@@ -2673,11 +2862,25 @@ declare global {
                         }
                     },
                     {
+                        table: 'sn_glider_source_artifact'
+                        id: '98edc774a7e54a0ebf308b6317e6066e'
+                        key: {
+                            name: 'x_winu_hireme_cv_viewer.do - BYOUI Files'
+                        }
+                    },
+                    {
                         table: 'sys_dictionary'
                         id: '997c6261c92a4d409137661c8c1cddaf'
                         key: {
                             name: 'x_winu_hireme_candidate_profile'
                             element: 'skills'
+                        }
+                    },
+                    {
+                        table: 'sys_ux_form_action'
+                        id: '9a338f9624ff4ecaa30884ebbebaa66e'
+                        key: {
+                            ui_action: 'ee711b2d16ec4141a971001a75aa934c'
                         }
                     },
                     {
@@ -2945,6 +3148,13 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ux_form_action'
+                        id: 'b902308af678476ca79d6cfbced73dff'
+                        key: {
+                            ui_action: 'a087e9704fda48109a87bcd270643026'
+                        }
+                    },
+                    {
                         table: 'sys_documentation'
                         id: 'baba162ec77442f18cc265f67173a23c'
                         key: {
@@ -3105,6 +3315,13 @@ declare global {
                         key: {
                             name: 'x_winu_hireme_kpi_snapshot'
                             element: 'category_distribution'
+                        }
+                    },
+                    {
+                        table: 'sys_ux_form_action'
+                        id: 'c8472f99e39842fc849ddb76fe1d7901'
+                        key: {
+                            ui_action: 'fba8ee99968a44a5b113d44fbdc63786'
                         }
                     },
                     {
@@ -3307,6 +3524,19 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_action_role'
+                        id: 'd4c8f43e303349a1b5de746c9bc6e9b1'
+                        key: {
+                            sys_ui_action: 'afcae76d873c4559a3c1e3e718e6cc50'
+                            sys_user_role: {
+                                id: '01621851ff6647998e25aefb11bac949'
+                                key: {
+                                    name: 'x_winu_hireme.admin'
+                                }
+                            }
+                        }
+                    },
+                    {
                         table: 'sys_user_role_contains'
                         id: 'd51be588f61d4d33a80964eb3f781547'
                         key: {
@@ -3448,6 +3678,15 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_documentation'
+                        id: 'de1a49875daa4829b93f721c09cfc32f'
+                        key: {
+                            name: 'x_winu_hireme_application'
+                            element: 'pending_note'
+                            language: 'en'
+                        }
+                    },
+                    {
                         table: 'sys_db_object'
                         id: 'dec67ac632454a2e9112f2f53c3cd61c'
                         key: {
@@ -3465,6 +3704,14 @@ declare global {
                                     name: 'x_winu_hireme.admin'
                                 }
                             }
+                        }
+                    },
+                    {
+                        table: 'sn_glider_source_artifact_m2m'
+                        id: 'e0d517a7b35844aa9c9ec030de19cb3c'
+                        key: {
+                            application_file: 'e3c76925e05c4e2483395b7e7e6cbd7d'
+                            source_artifact: '98edc774a7e54a0ebf308b6317e6066e'
                         }
                     },
                     {
@@ -3512,6 +3759,13 @@ declare global {
                             name: 'x_winu_hireme_kpi_snapshot'
                             element: 'offer_conversion_rate'
                             language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_ux_lib_asset'
+                        id: 'e3c76925e05c4e2483395b7e7e6cbd7d'
+                        key: {
+                            name: 'x_winu_hireme/main.js.map'
                         }
                     },
                     {
@@ -3573,6 +3827,19 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_action_role'
+                        id: 'e80f0cb014c84049a6809b30cb5581d1'
+                        key: {
+                            sys_ui_action: 'a087e9704fda48109a87bcd270643026'
+                            sys_user_role: {
+                                id: '01621851ff6647998e25aefb11bac949'
+                                key: {
+                                    name: 'x_winu_hireme.admin'
+                                }
+                            }
+                        }
+                    },
+                    {
                         table: 'sys_choice'
                         id: 'e8a3229a1fe444139a9d95b002cd2e31'
                         key: {
@@ -3592,6 +3859,14 @@ declare global {
                             value: 'push'
                             language: 'en'
                             dependent_value: 'NULL'
+                        }
+                    },
+                    {
+                        table: 'sn_glider_source_artifact_m2m'
+                        id: 'e903b6b829ac4b43b475cef4b893387b'
+                        key: {
+                            application_file: '921314a8d6384b01af8d732498639817'
+                            source_artifact: '98edc774a7e54a0ebf308b6317e6066e'
                         }
                     },
                     {
@@ -3893,6 +4168,13 @@ declare global {
                                     name: 'x_winu_hireme.admin'
                                 }
                             }
+                        }
+                    },
+                    {
+                        table: 'sys_ux_form_action'
+                        id: 'ffdc37ed5cef43728603c575668bc5b6'
+                        key: {
+                            ui_action: 'afcae76d873c4559a3c1e3e718e6cc50'
                         }
                     },
                 ]

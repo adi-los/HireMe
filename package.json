@@ -16,8 +16,14 @@
         "verify": "now-sdk build && node --test tests/*.test.mjs",
         "clean": "now-sdk clean"
     },
+    "dependencies": {
+        "react": "18.2.0",
+        "react-dom": "18.2.0",
+        "@servicenow/react-components": "^0.1.0"
+    },
     "devDependencies": {
         "@servicenow/sdk": "4.11.2",
-        "@servicenow/glide": "27.0.5"
+        "@servicenow/glide": "27.0.5",
+        "@types/react": "18.3.12"
     }
 }

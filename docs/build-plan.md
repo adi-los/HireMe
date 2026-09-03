@@ -77,7 +77,9 @@ layered on top (`scoring.use_llm=true`), not a dependency.
 | | Item |
 |---|---|
 | ✅ | RH Workspace — queue, candidates, job offers, scores, interview sessions, live dashboard — p.12. Deployed and verified end-to-end as an impersonated recruiter (not admin). |
-| ⬜ | CV Viewer + Profile side-by-side, Copilot Panel, Action Bar (Accept/Reject/Call/Schedule/Add Note) — the workspace has the data views; these are custom UI Builder components, not generated ones |
+| ✅ | Action Bar — Accept/Reject/Call/Schedule AI Interview/Add Note, verified end-to-end by impersonation. See below. |
+| 🔒 | CV Viewer + Profile — built and deployed, but broken at runtime (blank page, JS crash). See below. |
+| ⬜ | Copilot Panel |
 | ⬜ | Candidate portal pages (job board, apply flow UI) — the backend API for this already exists (`hireme_portal`), only the UI Builder pages are missing |
 | ⬜ | Virtual Agent topic "HireMe Assistant" |
 
@@ -136,6 +138,72 @@ whether the underlying check is correct.
 If you build another workspace, budget time to re-verify these three by
 impersonation — nothing here is guaranteed to be a one-off quirk of this
 particular lab instance.
+
+### Action Bar — built and verified
+
+All 5 buttons from p.12 (Accept, Reject, Call, Schedule AI Interview, Add
+Note) are live on the Application record inside the RH Workspace, as
+`UiAction` + the two required-but-undocumented-in-the-property-reference
+`sys_ux_form_action`/`sys_ux_form_action_layout_item` records (see
+`workspace/ui-actions.now.ts` for why — the property docs never mention
+them; only the `ui-action-guide` topic's prose does, and skipping either
+one leaves the action enabled with no visible button in Workspace).
+
+Verified by impersonation, not just by admin: Accept and Call both produced
+real, correct database writes — `final_decision`/`status` updated,
+`decision.recorded` and `call.scheduled` AuditLog rows written with
+`decided_by: hireme.demo.recruiter`, and a notification correctly queued.
+The `condition` on Accept/Reject/Schedule (hidden once `final_decision` is
+set) was also confirmed live. Add Note could not be exercised through this
+session's browser automation — its `clientScriptV2` calls the browser's
+native `prompt()`, which automated browser tooling generally can't drive —
+but it shares the identical, already-proven UiAction/audit-write mechanism
+as Call, so it's implemented with high confidence, just not click-tested.
+A human should click it once to be sure.
+
+### CV Viewer — built, deployed, does NOT work yet
+
+The one piece from this session that isn't done: `x_winu_hireme_cv_viewer.do`
+(blueprint p.12's "CV Viewer + Profile"), a React UI Page per the SDK's
+`ui-page-guide`. It builds cleanly, deploys cleanly, and the navigator entry
+is correctly gated to recruiter/hiring_manager/admin — but the page is
+**blank at runtime** for every role, including admin. The browser console
+shows a consistent crash on every load:
+
+```
+Uncaught TypeError: Cannot read properties of undefined (reading 'actionHandlers')
+  at .../uxasset/externals/x_winu_hireme/main.jsdbx:71:...
+```
+
+`document.getElementById('root').children.length` is 0 — React never
+mounts anything. Things ruled out already:
+
+- Not a stale-cache artifact — confirmed by cache-buster (`uxpcb`) value
+  matching the current load, checked twice across two separate deploys.
+- Not the `NowRecordListConnected` `view` prop — the docs' own basic usage
+  example includes `view="workspace"`, which this project's version
+  omitted; adding it did not change the error or its stack location.
+- Happens on the very first view (`ApplicationList`, plain
+  `NowRecordListConnected` on `x_winu_hireme_application`, no
+  `RecordProvider`/`RelatedLists` involved) — so the crash is not
+  specific to the `RelatedLists`/`RecordProvider` combination used in
+  `ApplicationDetail`.
+
+Leading suspect, untested: the crash appeared only after this table
+(`x_winu_hireme_application`) gained 5 custom `UiAction` records in the
+same deploy. "`actionHandlers`" strongly suggests the component is trying
+to enumerate the table's available declarative actions (see
+`RecordContext.actions.md`'s `actions.data.actionNodes`) and choking on
+one of them — but this is a hypothesis, not a confirmed cause; testing it
+means pointing `ApplicationList` at a table with zero custom UI actions
+(e.g. `x_winu_hireme_candidate`) and seeing whether it renders, which
+wasn't done before this session's time budget for the feature ran out.
+
+**Next step for whoever picks this up:** try the candidate-table
+substitution above first — it's a five-minute test that either confirms
+or rules out the leading suspect. The code is left in place (harmless when
+broken — it just shows a blank page to a recruiter who clicks the nav
+entry) rather than half-reverted.
 
 ---
 

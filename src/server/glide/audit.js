@@ -29,6 +29,8 @@ export const ACTIONS = {
     NOTIFICATION_SENT: 'notification.sent',
     COPILOT_QUERY: 'copilot.query',
     RETENTION_ANONYMIZED: 'retention.anonymized',
+    CALL_SCHEDULED: 'call.scheduled',
+    NOTE_ADDED: 'note.added',
 }
 
 /**

@@ -1,5 +1,5 @@
 import '@servicenow/sdk/global'
-import { Table, StringColumn, ReferenceColumn, DateTimeColumn } from '@servicenow/sdk/core'
+import { Table, StringColumn, ReferenceColumn, DateTimeColumn, MultiLineTextColumn } from '@servicenow/sdk/core'
 
 /**
  * Application — the spine of the model. Every supporting table
@@ -67,5 +67,11 @@ export const x_winu_hireme_application = Table({
         // Applications" (p.13) authenticates with instead of a login. Revisit
         // if/when the identity model changes to real candidate accounts.
         access_token: StringColumn({ label: 'Access Token', maxLength: 64 }),
+        // Transient carrier for the "Add Note" action bar button (p.12): the
+        // workspace client script stages text here and submits, the
+        // add-note UI action reads it into AuditLog and clears it in the
+        // same server round trip. Never holds a value outside that window —
+        // it is not a durable notes field.
+        pending_note: MultiLineTextColumn({ label: 'Pending Note (internal)' }),
     },
 })
