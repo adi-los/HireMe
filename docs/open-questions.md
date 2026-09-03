@@ -5,9 +5,20 @@ painful after the first deploy.
 
 ---
 
-## 1. Should `Application` extend `task`? — decide BEFORE first deploy
+## 1. ~~Should `Application` extend `task`?~~ — DECIDED: standalone
 
-**Status:** built as a standalone table, faithful to the blueprint data model (p.07).
+**Status: settled 2026-09-03, before the first deploy. Standalone.**
+The app is now installed on the dev instance with `x_winu_hireme_application`
+as a standalone table, so this is locked in — changing the parent now means
+dropping and recreating the table.
+
+Consequence to carry forward: SLA timers, recruiter assignment and work notes
+are **ours to build**, not inherited. Budget for that in weeks 3–4.
+
+<details>
+<summary>Original analysis (kept for the record)</summary>
+
+Built as a standalone table, faithful to the blueprint data model (p.07).
 
 The blueprint asks for things `task` gives you for free:
 
@@ -24,6 +35,8 @@ supported in-place migration. This is a first-week decision, not a later one.
 
 **Recommendation:** extend `task` if SLA tracking is genuinely in scope for v1;
 stay standalone if the first release is really just intake + scoring.
+
+</details>
 
 ---
 

@@ -15,11 +15,11 @@ Legend: ✅ done and verified · 🟡 partial · ⬜ not started · 🔒 blocked
 | ✅ | Project scaffolded | `now-sdk init`, scope `x_winu_hireme` |
 | ✅ | `now-sdk build` passes offline | verified repeatedly |
 | ✅ | Git repository | initialised, first commit made |
-| ⬜ | **Instance auth** | `npx now-sdk auth --add <url> --type basic` — needs your PDI |
+| ✅ | **Instance auth** | alias `dev`, user `admin`, nowlearning lab instance |
 | ⬜ | Git remote | `git remote add origin <repo-url>` |
 
-> Auth is the one thing that must happen at your keyboard — it takes a password
-> and I don't handle those.
+> The lab instance may be reclaimed or reset on a schedule — push to a remote
+> so the source isn't only on this machine.
 
 ---
 
@@ -31,8 +31,8 @@ Legend: ✅ done and verified · 🟡 partial · ⬜ not started · 🔒 blocked
 | ✅ | 4 roles | `src/fluent/security/roles.now.ts` |
 | ✅ | ACLs for the governance matrix | `src/fluent/security/acls.now.ts` |
 | 🔒 | Candidate ownership ACL | placeholder email match — open-questions #2 |
-| 🔒 | `Application extends task`? | decide **before** first deploy — open-questions #1 |
-| ⬜ | Deploy to dev | `npm run deploy` after auth |
+| ✅ | `Application extends task`? | **decided: standalone**, locked in by the deploy |
+| ✅ | Deploy to dev | installed and verified on the instance |
 
 ---
 
