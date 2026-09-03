@@ -10,6 +10,9 @@ export const x_winu_hireme_cv_document = Table({
     label: 'CV Document',
     display: 'file_name',
     audit: true,
+    // See the matching comment on x_winu_hireme_application — the CV Viewer
+    // UI Page reads this table via the Table API directly.
+    allowWebServiceAccess: true,
     schema: {
         application_ref: ReferenceColumn({
             label: 'Application',

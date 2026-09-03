@@ -17,6 +17,17 @@ export const x_winu_hireme_application = Table({
     display: 'number',
     audit: true,
     autoNumber: { number: 1000, numberOfDigits: 7, prefix: 'HIRE' },
+    // Needed by the CV Viewer UI Page (src/client/), which reads this table
+    // via the Table API directly — see the comment in
+    // src/client/services/tableApi.ts for why: the SDK's own recommended
+    // `RecordProvider`/`NowRecordListConnected` components share a
+    // module-level singleton that requires the Agent Workspace app-shell
+    // bootstrap, which a bare custom UI Page never triggers. Confirmed by
+    // reading @servicenow/react-components' own unminified source, not
+    // guessed. Table-level read ACLs (recruiter/hiring_manager/admin only)
+    // are the real access boundary here, same as everywhere else in this
+    // app — this flag only lets the REST surface reach those ACLs.
+    allowWebServiceAccess: true,
     schema: {
         number: StringColumn({ label: 'Number', maxLength: 40, readOnly: true }),
         candidate_ref: ReferenceColumn({

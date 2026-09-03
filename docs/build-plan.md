@@ -78,7 +78,7 @@ layered on top (`scoring.use_llm=true`), not a dependency.
 |---|---|
 | ✅ | RH Workspace — queue, candidates, job offers, scores, interview sessions, live dashboard — p.12. Deployed and verified end-to-end as an impersonated recruiter (not admin). |
 | ✅ | Action Bar — Accept/Reject/Call/Schedule AI Interview/Add Note, verified end-to-end by impersonation. See below. |
-| 🔒 | CV Viewer + Profile — built and deployed, but broken at runtime (blank page, JS crash). See below. |
+| ✅ | CV Viewer + Profile — built, deployed, verified by impersonation. Root cause of an earlier runtime crash confirmed and fixed. See below. |
 | ⬜ | Copilot Panel |
 | ⬜ | Candidate portal pages (job board, apply flow UI) — the backend API for this already exists (`hireme_portal`), only the UI Builder pages are missing |
 | ⬜ | Virtual Agent topic "HireMe Assistant" |
@@ -161,49 +161,56 @@ but it shares the identical, already-proven UiAction/audit-write mechanism
 as Call, so it's implemented with high confidence, just not click-tested.
 A human should click it once to be sure.
 
-### CV Viewer — built, deployed, does NOT work yet
+### CV Viewer — built, deployed, and fixed
 
-The one piece from this session that isn't done: `x_winu_hireme_cv_viewer.do`
-(blueprint p.12's "CV Viewer + Profile"), a React UI Page per the SDK's
-`ui-page-guide`. It builds cleanly, deploys cleanly, and the navigator entry
-is correctly gated to recruiter/hiring_manager/admin — but the page is
-**blank at runtime** for every role, including admin. The browser console
-shows a consistent crash on every load:
+`x_winu_hireme_cv_viewer.do` (blueprint p.12's "CV Viewer + Profile"), a
+React UI Page. First version — built exactly per the SDK's `ui-page-guide`,
+using `NowRecordListConnected`/`RecordProvider`/`RelatedLists` — deployed
+and built cleanly but was **blank at runtime for every role, including
+admin**, with a console crash on every load:
 
 ```
 Uncaught TypeError: Cannot read properties of undefined (reading 'actionHandlers')
-  at .../uxasset/externals/x_winu_hireme/main.jsdbx:71:...
 ```
 
-`document.getElementById('root').children.length` is 0 — React never
-mounts anything. Things ruled out already:
+**Root cause, confirmed by reading the package's own unminified source**
+(`node_modules/@servicenow/react-components/dist/csdb-react/index.js`), not
+guessed: every one of those "connected" components — list, form, and
+related-list alike — shares one module-level singleton,
+`formFetcherBehaviorClassic`, built by calling
+`scriptingEnvironment.createFormFetchingBehavior(...)` **at import time**,
+unconditionally, the moment the bundle loads. That call requires the actual
+Agent Workspace / Workspace app-shell bootstrap to already be running,
+which a bare custom UI Page (`sys_ui_page`, no shell) never triggers — so
+`createFormFetchingBehavior` silently returns `undefined`, and the very
+next line (`formFetcherBehaviorClassic.actionHandlers`) throws before React
+ever mounts anything. This is a **package-level requirement no doc
+mentions**, not a bug in this app's props or JSX — confirmed by testing
+across two different tables (one with 5 custom UI actions, one with none:
+identical crash) and both the list and form-only code paths (also
+identical crash), which is what proved it wasn't table- or
+component-specific.
 
-- Not a stale-cache artifact — confirmed by cache-buster (`uxpcb`) value
-  matching the current load, checked twice across two separate deploys.
-- Not the `NowRecordListConnected` `view` prop — the docs' own basic usage
-  example includes `view="workspace"`, which this project's version
-  omitted; adding it did not change the error or its stack location.
-- Happens on the very first view (`ApplicationList`, plain
-  `NowRecordListConnected` on `x_winu_hireme_application`, no
-  `RecordProvider`/`RelatedLists` involved) — so the crash is not
-  specific to the `RelatedLists`/`RecordProvider` combination used in
-  `ApplicationDetail`.
+**Fix:** dropped the "connected" component family for this page entirely
+and read the same tables directly via the Table API (`src/client/services/
+tableApi.ts`), following the exact pattern the SDK's own guide documents
+for cases outside `NowRecordListConnected`/`RecordProvider`'s reach —
+`sysparm_display_value=all` plus an `X-UserToken: window.g_ck` header. This
+needed `allowWebServiceAccess: true` on `x_winu_hireme_application`,
+`_cv_document` and `_candidate_profile` (previously unset, intentionally,
+on every table in this app) — the real access boundary stays the existing
+read ACLs, this flag only lets the REST surface reach them. Confirmed:
+still correctly gated to recruiter/hiring_manager/admin.
 
-Leading suspect, untested: the crash appeared only after this table
-(`x_winu_hireme_application`) gained 5 custom `UiAction` records in the
-same deploy. "`actionHandlers`" strongly suggests the component is trying
-to enumerate the table's available declarative actions (see
-`RecordContext.actions.md`'s `actions.data.actionNodes`) and choking on
-one of them — but this is a hypothesis, not a confirmed cause; testing it
-means pointing `ApplicationList` at a table with zero custom UI actions
-(e.g. `x_winu_hireme_candidate`) and seeing whether it renders, which
-wasn't done before this session's time budget for the feature ran out.
+Verified end-to-end as the impersonated demo recruiter, not just admin:
+both views render, both show the correct data for both demo applications —
+CV text, OCR status, parsed skills/experience/education/confidence, side
+by side exactly as p.12 describes.
 
-**Next step for whoever picks this up:** try the candidate-table
-substitution above first — it's a five-minute test that either confirms
-or rules out the leading suspect. The code is left in place (harmless when
-broken — it just shows a blank page to a recruiter who clicks the nav
-entry) rather than half-reverted.
+**If you build another React UI Page:** don't use `RecordProvider`,
+`NowRecordListConnected`, `RelatedLists`, `FormColumnLayout` or
+`FormActionBar` — none of them will render outside an actual Workspace
+shell. Use `tableApi.ts`'s pattern (or extend it) instead.
 
 ---
 

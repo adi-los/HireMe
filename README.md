@@ -82,12 +82,22 @@ workspaces (a baseline `canvas_user` role, a `now.` prefix on `ux_route` ACL
 names, and `UxList.roles` silently not working) — see
 [`docs/build-plan.md`](docs/build-plan.md) for the full story.
 
+The Action Bar (Accept/Reject/Call/Schedule AI Interview/Add Note) and the
+CV Viewer + Profile page are also built, deployed and verified by
+impersonation. The CV Viewer hit a real one: the SDK-recommended React data
+components (`RecordProvider`, `NowRecordListConnected`, `RelatedLists`)
+share a module-level singleton that silently requires the Agent Workspace
+app-shell to already be running — confirmed by reading the package's own
+source, not guessed — so it crashed on every load inside a bare custom UI
+Page. Fixed by reading the same tables directly via the Table API instead.
+Full story, and what to avoid if you build another React UI Page, in
+[`docs/build-plan.md`](docs/build-plan.md).
+
 Not started: the AI agents (deliberately gated — see
-[`docs/ai-agents-brief.md`](docs/ai-agents-brief.md)) and the remaining UI
-(CV viewer, Copilot panel, action bar, candidate portal pages, Virtual
-Agent topic). The backend does not depend on any of these — matching and
-scoring run on the deterministic engine with no AI Agent Studio license
-required.
+[`docs/ai-agents-brief.md`](docs/ai-agents-brief.md)), the Copilot panel,
+candidate portal pages, and the Virtual Agent topic. The backend does not
+depend on any of these — matching and scoring run on the deterministic
+engine with no AI Agent Studio license required.
 
 Two decisions were made and implemented rather than left open: `Application`
 stays standalone (not `task`-derived), and candidate identity uses a

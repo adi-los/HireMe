@@ -9,6 +9,9 @@ export const x_winu_hireme_candidate_profile = Table({
     name: 'x_winu_hireme_candidate_profile',
     label: 'Candidate Profile',
     audit: true,
+    // See the matching comment on x_winu_hireme_application — the CV Viewer
+    // UI Page reads this table via the Table API directly.
+    allowWebServiceAccess: true,
     schema: {
         application_ref: ReferenceColumn({
             label: 'Application',

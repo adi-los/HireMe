@@ -42,6 +42,19 @@ HireMe: a ServiceNow scoped app (`x_winu_hireme`) built pro-code with Fluent
   makes admin pass regardless of whether the underlying role check actually
   works. Every real ACL bug found in this project was invisible until tested
   as someone who wasn't admin.
+- **On a React `UiPage()`, never use `RecordProvider`, `NowRecordListConnected`,
+  `RelatedLists`, `FormColumnLayout` or `FormActionBar`.** They share one
+  module-level singleton (`@servicenow/react-components`' internal
+  `csdb-react/index.js`) that calls `scriptingEnvironment.createFormFetchingBehavior(...)`
+  at import time and needs the Agent Workspace app-shell already running — a
+  bare custom UI Page never provides that, so every one of those components
+  crashes identically (`Cannot read properties of undefined (reading
+  'actionHandlers')`), React never mounts, and the page is just blank.
+  Confirmed by reading the package's own unminified source, not guessed.
+  Use `src/client/services/tableApi.ts`'s direct-fetch pattern instead
+  (needs `allowWebServiceAccess: true` on the tables involved — the real
+  access boundary stays the existing read ACLs). Full story in
+  `docs/build-plan.md` under "CV Viewer".
 
 ## Structure
 
