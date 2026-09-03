@@ -26,6 +26,22 @@ HireMe: a ServiceNow scoped app (`x_winu_hireme`) built pro-code with Fluent
 - Deleting a `Table()`/`Record()` call is a **tracked deletion** — it generates
   a delete record that propagates to installed instances. Never remove one to
   "clean up"; ask first.
+- **`Record()` does not populate platform defaults.** A `sys_user_has_role`
+  row needs `state: 'active'` set explicitly, or the role grant inserts fine
+  but never resolves into the user's session — found by impersonating a demo
+  user and getting an empty role set despite a correct DB row.
+- **Workspaces need `containsRoles: ['canvas_user']` on every role that
+  should reach them**, and `ux_route` ACL names need a `now.` prefix
+  (`now.{path}.*`, not bare `{path}.*`). Neither is documented; both cause a
+  flat "Access Denied" for a real non-admin user while admin sails through
+  via `adminOverrides`. `UxList.roles` (string) also silently does nothing —
+  use `applicabilities` + `Applicability` instead. Full story in
+  `docs/build-plan.md` under "RH Workspace".
+- **Test ACLs by impersonating a role-only demo user, never by testing as
+  admin.** `adminOverrides: true` — the default on almost every ACL here —
+  makes admin pass regardless of whether the underlying role check actually
+  works. Every real ACL bug found in this project was invisible until tested
+  as someone who wasn't admin.
 
 ## Structure
 

@@ -66,18 +66,28 @@ now.config.json    scope + scopeId
 ## Status
 
 The full backend is built, tested and deployed to a dev instance: 11 tables,
-5 roles, 34 ACLs, the CV-to-score pipeline (OCR call + webhook, rule-based
+5 roles, 34+ ACLs, the CV-to-score pipeline (OCR call + webhook, rule-based
 profile parsing and matching, weighted scoring, interview blending), a public
 candidate-portal API (apply / status / "I'm interested"), 2 scheduled jobs
 (hourly KPIs, daily retention), and 16 navigator entries. 31 unit tests pass
 offline; every record count above was verified against the live instance, not
 just the installer's own success message.
 
+The RH Workspace (blueprint p.12) is also built and deployed: a live
+dashboard and a 10-list, 3-category queue at `/x/winu/hireme-rh/home`,
+verified end-to-end by impersonating a role-only recruiter — not admin,
+whose `adminOverrides` would have masked a broken ACL. That verification
+pass caught three undocumented platform requirements for UI Builder
+workspaces (a baseline `canvas_user` role, a `now.` prefix on `ux_route` ACL
+names, and `UxList.roles` silently not working) — see
+[`docs/build-plan.md`](docs/build-plan.md) for the full story.
+
 Not started: the AI agents (deliberately gated — see
-[`docs/ai-agents-brief.md`](docs/ai-agents-brief.md)) and the UI Builder
-layers (RH Workspace, candidate portal pages). The backend does not depend on
-either — matching and scoring run on the deterministic engine with no AI
-Agent Studio license required.
+[`docs/ai-agents-brief.md`](docs/ai-agents-brief.md)) and the remaining UI
+(CV viewer, Copilot panel, action bar, candidate portal pages, Virtual
+Agent topic). The backend does not depend on any of these — matching and
+scoring run on the deterministic engine with no AI Agent Studio license
+required.
 
 Two decisions were made and implemented rather than left open: `Application`
 stays standalone (not `task`-derived), and candidate identity uses a
