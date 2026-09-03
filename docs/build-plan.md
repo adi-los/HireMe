@@ -36,30 +36,39 @@ Legend: ✅ done and verified · 🟡 partial · ⬜ not started · 🔒 blocked
 
 ---
 
-## Weeks 3–4 · Core flows
+## Weeks 3–4 · Core flows — done, built as business rules rather than Flow Designer
 
 | | Item | Notes |
 |---|---|---|
-| ⬜ | Application intake flow | create Application → status `received` → attach CVDocument |
-| ⬜ | OCR integration | Scripted REST + async webhook callback — provider undecided (open-questions #4) |
-| ⬜ | Profile parsing | rule-based pass + LLM fallback → `CandidateProfile` |
-| ⬜ | Status transitions | `received → screened → interviewing → decided → closed` |
+| ✅ | Application intake | Public REST API (`hireme_portal/apply`), since candidates aren't sys_users — `src/server/glide/intake.js` |
+| ✅ | Candidate profile matching | `src/server/matching.js` — 5 criteria vs `JobOffer.requirements`, 15 tests |
+| ✅ | Profile parsing | `src/server/profile-parser.js` — rule-based, 10 tests. LLM refinement pass exists (`pipeline.js`) but is off by default (`scoring.use_llm=false`) |
+| ✅ | OCR integration | Outbound `RestMessage` + inbound webhook, provider-agnostic, off by default (`ocr.enabled=false`) — provider still undecided, open-questions #4 |
+| ✅ | Status transitions | driven by business rules on `Application`/`CVDocument`/`InterviewSession`, not a Flow Designer flow |
+| ✅ | "My Applications" status check | token-gated public endpoint (`hireme_portal/status/{id}`) — never exposes score |
+| ✅ | "I'm Interested" soft-apply | `hireme_portal/interest` |
 
-Read `now-sdk explain flow-api` and `restapi-api` before starting.
+**Deliberate deviation from the blueprint's "Flow Designer" plan (p.04):** everything
+here is Business Rules + Scheduled Scripts instead. Same triggers, same outcome,
+easier to unit-test the surrounding logic, harder to hand to a non-technical
+admin to tweak visually. Revisit if that visual-editability matters to you.
 
 ---
 
-## Weeks 5–6 · AI layer
+## Weeks 5–6 · AI layer — arithmetic and matching done; the agents are gated
 
 | | Item | Notes |
 |---|---|---|
-| ✅ | Scoring arithmetic + banding + blending | `src/server/scoring.js`, 8 tests passing |
-| 🔒 | Scoring Agent | gated on the 4 questions in `ai-agents-brief.md` |
-| 🔒 | Interview Agent | same gate |
-| 🔒 | Copilot skill | same gate |
+| ✅ | Scoring arithmetic + banding + blending | `src/server/scoring.js`, 8 tests |
+| ✅ | Deterministic criteria matching | `src/server/matching.js` — this is what actually produces the 5 sub-scores today |
+| ✅ | Pipeline wiring | CV → OCR → profile → match → score → category, all the way to `ScoringResult`, fully automated |
+| 🔒 | Scoring Agent (LLM refinement of the 5 sub-scores) | gated on the 4 questions in `ai-agents-brief.md`; `sn_generative_ai.LLMClient` call is written and guarded, just switched off |
+| 🔒 | Interview Agent | same gate — no question generation or answer evaluation exists yet |
+| 🔒 | Copilot skill | same gate — no natural-language grounding exists yet |
 
-The deterministic half is done and tested. The agents only need to return five
-sub-scores and a confidence — see `scoring.md`.
+**The app works end to end without any AI Agent Studio license** — matching and
+scoring run on the rule-based engine alone. The agents are a quality upgrade
+layered on top (`scoring.use_llm=true`), not a dependency.
 
 ---
 
@@ -79,10 +88,11 @@ sub-scores and a confidence — see `scoring.md`.
 
 | | Item |
 |---|---|
-| ✅ | Unit tests for scoring boundaries |
+| ✅ | Unit tests | 31 passing — scoring, matching, profile parsing, all offline |
 | ✅ | CI workflow | `.github/workflows/hireme-ci.yml` — build + tests run on every PR |
-| ⬜ | ATF suites per flow | `now-sdk explain atf-guide` |
-| ⬜ | Security review of ACLs on a real instance |
+| ✅ | Backend deployed to dev | all 11 tables, 5 roles, 34 ACLs, 8 business rules, 2 REST APIs (4 routes), 2 scheduled jobs, 11 properties, 16 nav modules — every count verified against the live instance, not just the installer's own "success" message |
+| ⬜ | ATF suites | `now-sdk explain atf-guide` — none written; the 31 offline tests cover the pure logic, ATF would cover the Glide-dependent pipeline/business-rule layer that can't run outside an instance |
+| ⬜ | Security review of ACLs on a real instance | the ACL *design* is done (governance matrix + guest-write scoping for the public portal); nobody has clicked through as each role yet |
 | ⬜ | Wire ATF into CI (`now-sdk cicd`) — needs instance secrets |
 
 ---
@@ -97,13 +107,24 @@ sub-scores and a confidence — see `scoring.md`.
 
 ---
 
-## Suggested order for the first session
+## Suggested order for the next session
 
-1. `npx now-sdk auth --add <your-instance> --type basic` *(you, at the keyboard)*
-2. Decide open-questions **#1** (task inheritance) — it is the only truly
-   irreversible one
-3. `npm run verify` then `npm run deploy` — get the 10 tables live on the PDI
-4. Poke the tables in the UI, confirm the ACLs behave
-5. Then start the intake flow (weeks 3–4)
+1. Click through the app as each role (impersonate) — the ACL surface is now
+   large enough that this is worth doing deliberately rather than trusting
+   the design read-through
+2. Pick an OCR provider (open-questions #4) — flip `x_winu_hireme.ocr.enabled`
+   to true and the pipeline runs for real
+3. Decide the AI Agent gate questions in `ai-agents-brief.md` — unlocks the
+   LLM refinement pass and the Copilot/Interview agents
+4. Then UI (weeks 7–9) — nothing in the backend blocks starting this now
 
-Decisions #2–#6 can all wait until their phase.
+## Note on `npm run deploy`
+
+If `now-sdk install` fails with `Could not determine app installation status`
+and the instance's own Upgrade History (`sys_upgrade_history_list.do`) shows
+no new entry for the attempt, the install failed before ServiceNow's own
+apply-changes engine started — not a metadata problem in the package. This
+happened once on the nowlearning lab instance and `now-sdk install --reinstall`
+resolved it (uninstall + clean reinstall). Only safe when nothing on the
+instance was hand-edited outside this source, since a reinstall discards
+metadata that isn't in the local package.

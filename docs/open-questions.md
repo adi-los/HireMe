@@ -40,27 +40,46 @@ stay standalone if the first release is really just intake + scoring.
 
 ---
 
-## 2. How does a candidate authenticate? — blocks the candidate ACLs
+## 2. How does a candidate authenticate? — IMPLEMENTED: tokenised magic link
 
-The blueprint has a **public** job board and portal (p.13) plus a `candidate`
-role that can "view & edit own application only" (p.11). Those two facts sit
-awkwardly together: a public applicant is not a `sys_user`, so there is nothing
-for an ACL to match on.
+**Status: built, not just decided.** The blueprint has a **public** job board
+and portal (p.13) plus a `candidate` role that can "view & edit own
+application only" (p.11) — but a public applicant is not necessarily a
+`sys_user`, so a login-based ACL had nothing to check.
 
-The `Candidate` table currently has no `sys_user` reference. The ownership ACL
-in `src/fluent/security/acls.now.ts` matches on **email** as a placeholder —
-functional, but weak (email is user-editable in many setups).
+Implemented the "tokenised magic link" option from the table below:
+`Application.access_token` is a GUID issued by `submitApplication()`
+(`src/server/glide/intake.js`) at apply time. The candidate-facing REST API
+(`hireme_portal/status/{id}?access_token=...`) requires it to read anything
+back, and never returns score or category regardless. The `x_winu_hireme.candidate`
+role and its email-match ACLs still exist for the case where a candidate *is*
+a real `sys_user` (e.g. an internal referral), but the public flow no longer
+depends on that.
 
-**Options:**
+Real cost paid for this: the portal's REST endpoints run under the platform's
+**guest session**, which has no HireMe role at all. That required narrow
+public `create` ACLs on `Candidate`/`Application`/`CVDocument` (create only —
+read/write/delete stay role-restricted), a field-scoped public write on
+`Candidate.consent_given_at` for a returning applicant, and a condition-based
+public read on `Application` gated by "access_token is populated" (the actual
+secret comparison happens in script, since an ACL can't see the caller's query
+parameters). All four are in `src/fluent/security/acls.now.ts` with inline
+rationale — read those comments before touching this area, the reasoning
+matters more than the pattern.
+
+**Original options considered, for the record:**
 
 | Option | Cost | Notes |
 |---|---|---|
-| Public sign-up creates a real `sys_user` | Medium | Cleanest ACL story; needs user-provisioning + password flows |
-| Tokenised magic link per application | Low | No login; token in the "My Applications" URL. Good for v1 |
-| Keep email matching | Lowest | Only safe if candidate accounts are provisioned and email is locked |
+| Public sign-up creates a real `sys_user` | Medium | Cleanest ACL story; needs user-provisioning + password flows. Not built. |
+| **Tokenised magic link per application** | Low | **Built.** No login; token required on every status read. |
+| Keep email matching only | Lowest | Kept as a secondary path for candidates who are real sys_users. |
 
-**Nothing else is blocked by this** — recruiter/manager/admin ACLs are complete
-and correct regardless.
+**Still open:** the token travels in a URL query string (`?access_token=...`),
+which browsers log in history and servers may log in access logs. Acceptable
+for a v1 status-check endpoint that leaks no score/PII beyond what's already
+in the URL the candidate holds; revisit if this needs to survive a security
+review.
 
 ---
 

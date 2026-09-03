@@ -65,13 +65,24 @@ now.config.json    scope + scopeId
 
 ## Status
 
-Foundations are built and verified: all 10 tables, 4 roles and the governance
-ACLs compile, and the scoring engine passes its tests. Flows, the AI agents and
-the UI layers are not started — see [`docs/build-plan.md`](docs/build-plan.md).
+The full backend is built, tested and deployed to a dev instance: 11 tables,
+5 roles, 34 ACLs, the CV-to-score pipeline (OCR call + webhook, rule-based
+profile parsing and matching, weighted scoring, interview blending), a public
+candidate-portal API (apply / status / "I'm interested"), 2 scheduled jobs
+(hourly KPIs, daily retention), and 16 navigator entries. 31 unit tests pass
+offline; every record count above was verified against the live instance, not
+just the installer's own success message.
 
-Three things need a human decision before they can proceed; the most urgent is
-whether `Application` should extend `task`, because that cannot be changed after
-the first deploy. See [`docs/open-questions.md`](docs/open-questions.md).
+Not started: the AI agents (deliberately gated — see
+[`docs/ai-agents-brief.md`](docs/ai-agents-brief.md)) and the UI Builder
+layers (RH Workspace, candidate portal pages). The backend does not depend on
+either — matching and scoring run on the deterministic engine with no AI
+Agent Studio license required.
+
+Two decisions were made and implemented rather than left open: `Application`
+stays standalone (not `task`-derived), and candidate identity uses a
+tokenised magic link rather than real `sys_user` accounts. Both are explained,
+with the tradeoffs, in [`docs/open-questions.md`](docs/open-questions.md).
 
 ## Useful SDK docs
 

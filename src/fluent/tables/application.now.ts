@@ -61,5 +61,11 @@ export const x_winu_hireme_application = Table({
                 withdrawn: 'Withdrawn',
             },
         }),
+        // Working answer to open-questions.md #2: the public portal candidate
+        // is not necessarily a sys_user, so this opaque token — issued at
+        // apply time, required on every status check — is what "My
+        // Applications" (p.13) authenticates with instead of a login. Revisit
+        // if/when the identity model changes to real candidate accounts.
+        access_token: StringColumn({ label: 'Access Token', maxLength: 64 }),
     },
 })

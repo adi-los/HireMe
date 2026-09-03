@@ -36,3 +36,15 @@ export const adminRole = Role({
     description: 'HireMe administrator. Configures scoring weights, categories, ACLs and AI Agent prompts.',
     containsRoles: [recruiterRole, hiringManagerRole],
 })
+
+/**
+ * Machine identity for the OCR provider's callback, not named in the
+ * blueprint's governance table (p.11) because that table is about people.
+ * Kept separate from `admin` deliberately — least privilege for a service
+ * account that only needs to post extracted text back to one endpoint.
+ */
+export const integrationRole = Role({
+    $id: Now.ID['role_integration'],
+    name: 'x_winu_hireme.integration',
+    description: 'Service-account role for external callbacks (OCR webhook). Not for human users.',
+})
