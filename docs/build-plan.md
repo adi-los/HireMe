@@ -92,7 +92,7 @@ layered on top (`scoring.use_llm=true`), not a dependency.
 | ✅ | CI workflow | `.github/workflows/hireme-ci.yml` — build + tests run on every PR |
 | ✅ | Backend deployed to dev | all 11 tables, 5 roles, 34 ACLs, 8 business rules, 2 REST APIs (4 routes), 2 scheduled jobs, 11 properties, 16 nav modules — every count verified against the live instance, not just the installer's own "success" message |
 | ⬜ | ATF suites | `now-sdk explain atf-guide` — none written; the 31 offline tests cover the pure logic, ATF would cover the Glide-dependent pipeline/business-rule layer that can't run outside an instance |
-| ⬜ | Security review of ACLs on a real instance | the ACL *design* is done (governance matrix + guest-write scoping for the public portal); nobody has clicked through as each role yet |
+| ✅ | Security review of ACLs on a real instance | verified 2026-09-03 by impersonating a demo recruiter (single role, not admin — admin's `adminOverrides:true` on most ACLs would have hidden a broken role check). Confirmed: reads Applications/Candidates/JobOffers/ScoringResults correctly, correctly **blocked** from AuditLog. See the finding below. |
 | ⬜ | Wire ATF into CI (`now-sdk cicd`) — needs instance secrets |
 
 ---
@@ -128,3 +128,30 @@ happened once on the nowlearning lab instance and `now-sdk install --reinstall`
 resolved it (uninstall + clean reinstall). Only safe when nothing on the
 instance was hand-edited outside this source, since a reinstall discards
 metadata that isn't in the local package.
+
+## Note on `Record()` and role grants — a real bug this caught
+
+Impersonating the demo recruiter (`src/fluent/demo/demo-users.now.ts`) first
+showed every role-gated page as "Security constraints prevent access" —
+Candidate, CVDocument, etc. — while `Application` worked. That split was the
+clue: `Application` has a role-*independent* public read ACL (the
+token-gated status endpoint's ACL, `access_tokenISNOTEMPTY`), so it never
+actually exercised the recruiter role at all.
+
+Root cause: `sys_user_has_role.state` was empty string on every demo role
+grant. `Record()` does not populate platform defaults (documented SDK
+behavior — see the `record-api` topic), and a normal role grant made through
+the UI sets `state: 'active'` automatically; ours didn't. An empty `state`
+inserts the row fine but the platform never resolves it into the session's
+role set — confirmed directly via `window.g_user.hasRole(...)` returning
+`false` for a role the database plainly showed the user had.
+
+Fixed in source (`state: 'active'` added to all three demo role Record()
+calls) and on the instance (same fix, applied by hand to the 3 existing
+rows rather than a full reinstall). **If you add more demo `sys_user_has_role`
+rows, set `state: 'active'` explicitly — it will not default correctly.**
+
+After the fix, impersonation confirmed the ACL design is correct: the
+recruiter reads Application/Candidate/JobOffer/ScoringResult (including the
+reference fields, which had also been rendering blank for the same reason)
+and is cleanly denied AuditLog.

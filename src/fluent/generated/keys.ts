@@ -177,6 +177,74 @@ declare global {
                         table: 'sys_script'
                         id: 'e8c99d2ca19e440da3f6a10dfa7829b6'
                     }
+                    demo_application_strong: {
+                        table: 'x_winu_hireme_application'
+                        id: '702f8f686ead40d9b88e683a26e95a81'
+                    }
+                    demo_application_weak: {
+                        table: 'x_winu_hireme_application'
+                        id: '92d31d8b4c854bb9ac1ab39781f4c576'
+                    }
+                    demo_candidate_strong: {
+                        table: 'x_winu_hireme_candidate'
+                        id: '10762ba7bad5422ba20443dcaf81e764'
+                    }
+                    demo_candidate_weak: {
+                        table: 'x_winu_hireme_candidate'
+                        id: 'cfe781afad0e4f12b00d046160cf2883'
+                    }
+                    demo_cv_strong: {
+                        table: 'x_winu_hireme_cv_document'
+                        id: 'fdb935fbb95f49c692b19be163ca8e9d'
+                    }
+                    demo_cv_weak: {
+                        table: 'x_winu_hireme_cv_document'
+                        id: 'c6c6fca462c34743af4372e5ca62dc96'
+                    }
+                    demo_job_offer_platform_eng: {
+                        table: 'x_winu_hireme_job_offer'
+                        id: '04ef9b6c9d0347e59dd2348df2e5d4e1'
+                    }
+                    demo_profile_strong: {
+                        table: 'x_winu_hireme_candidate_profile'
+                        id: '107551d612f940b3a7ba4b21bf06bb46'
+                    }
+                    demo_profile_weak: {
+                        table: 'x_winu_hireme_candidate_profile'
+                        id: '89f97a4dc4e84b298fe3c6480524f353'
+                    }
+                    demo_scoring_strong: {
+                        table: 'x_winu_hireme_scoring_result'
+                        id: '9ee41f76f81a49609d20973cbf51d456'
+                    }
+                    demo_scoring_weak: {
+                        table: 'x_winu_hireme_scoring_result'
+                        id: '900429da0bb64c40aec6380392ff5c20'
+                    }
+                    demo_user_candidate: {
+                        table: 'sys_user'
+                        id: '570ca67f7cba4f969af29474c9d6f8a2'
+                    }
+                    demo_user_candidate_role: {
+                        table: 'sys_user_has_role'
+                        id: 'bd1de8c4aa114c588cad093fcfe799fc'
+                    }
+                    demo_user_hiring_manager: {
+                        table: 'sys_user'
+                        id: '14163567cb4446198c04fc03b43e4a14'
+                    }
+                    demo_user_hiring_manager_role: {
+                        table: 'sys_user_has_role'
+                        id: '9e65ecf38d35497fb69c9bbe5e886128'
+                    }
+                    demo_user_recruiter: {
+                        table: 'sys_user'
+                        id: '0e3c92b35b6c49d7a04a64cebf74da12'
+                    }
+                    demo_user_recruiter_role: {
+                        table: 'sys_user_has_role'
+                        id: '6ae5b61532db4478b2d07f0cc315400e'
+                    }
                     job_kpi_aggregation: {
                         table: 'sysauto_script'
                         id: '1296f1c184c04f0a8cbd22daead26a4b'
