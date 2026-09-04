@@ -70,6 +70,14 @@ export function fetchProfileForApplication(applicationId: string): Promise<any |
     }).then(rows => rows[0] || null)
 }
 
+export function fetchChatHistory(applicationId: string, limit = 50): Promise<any[]> {
+    return tableApiFetch('x_winu_hireme_chat_interaction', {
+        fields: 'role,message,citations,timestamp',
+        query: `application_ref=${applicationId}^channel=rh_copilot^ORDERBYtimestamp`,
+        limit,
+    })
+}
+
 export function fetchApplicationHeader(applicationId: string): Promise<any | null> {
     return tableApiFetch('x_winu_hireme_application', {
         fields: 'number,candidate_ref,joboffer_ref,status,final_decision',

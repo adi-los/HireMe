@@ -310,13 +310,30 @@ Acl({
 })
 
 Acl({
+    $id: Now.ID['acl_chat_interaction_create'],
+    type: 'record',
+    table: 'x_winu_hireme_chat_interaction',
+    operation: 'create',
+    // The Copilot REST endpoint (src/server/rest/copilot.js) runs as the
+    // invoking recruiter's own session, not an elevated service account, so
+    // both the user turn and the assistant turn it inserts need a `create`
+    // ACL for that recruiter's roles — there was none at all before this,
+    // which would have silently 403'd every chat turn under impersonation.
+    roles: [recruiterRole, hiringManagerRole, adminRole],
+    adminOverrides: true,
+    description: 'Recruiters/hiring managers write their own Copilot turns; the assistant turn is inserted in the same session.',
+})
+
+Acl({
     $id: Now.ID['acl_chat_interaction_write'],
     type: 'record',
     table: 'x_winu_hireme_chat_interaction',
     operation: 'write',
     roles: [adminRole],
     adminOverrides: true,
-    description: 'Chat rows are appended by the Copilot skill, not edited by hand.',
+    // Append-only like ScoringResult/AuditLog — a transcript row is
+    // inserted once and never edited after the fact.
+    description: 'Chat rows are appended once, never edited by hand.',
 })
 
 /* ------------------------------------------------------------------ *

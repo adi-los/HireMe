@@ -93,11 +93,19 @@ Page. Fixed by reading the same tables directly via the Table API instead.
 Full story, and what to avoid if you build another React UI Page, in
 [`docs/build-plan.md`](docs/build-plan.md).
 
-Not started: the AI agents (deliberately gated — see
-[`docs/ai-agents-brief.md`](docs/ai-agents-brief.md)), the Copilot panel,
-candidate portal pages, and the Virtual Agent topic. The backend does not
-depend on any of these — matching and scoring run on the deterministic
-engine with no AI Agent Studio license required.
+The RH Copilot chat panel (blueprint p.12) is also built, deployed and
+verified by impersonation — a recruiter can ask a question scoped to one
+application and get a cited answer. This instance has neither AI Agent
+Studio nor `sn_generative_ai` installed (confirmed directly, not assumed —
+see [`docs/open-questions.md`](docs/open-questions.md) #5), so the Copilot
+reaches an external LLM (OpenRouter) via a provider-agnostic `RestMessage`
+instead. The four AI-agent gate questions were answered 2026-09-04
+(see [`docs/ai-agents-brief.md`](docs/ai-agents-brief.md)); the Scoring and
+Interview agents themselves aren't built yet, just the Copilot skill.
+
+Not started: the Scoring/Interview agents (LLM refinement layered on top of
+the deterministic engine — optional, not a dependency), candidate portal
+pages, and the Virtual Agent topic.
 
 Two decisions were made and implemented rather than left open: `Application`
 stays standalone (not `task`-derived), and candidate identity uses a

@@ -1,6 +1,11 @@
 # AI layer — decision brief
 
-**No agent code has been written yet, on purpose.**
+**No agent code has been written yet.** The four gate questions below were
+answered by the user on 2026-09-04 (see decisions inline). What's still
+outstanding is the three prerequisites — those need a live instance query,
+which needs the user logged in (this machine holds no ServiceNow
+credentials), not a judgment call. Once those are confirmed, agent code can
+be written.
 
 The SDK's own `building-ai-agents-guide` sets a hard gate: four questions must be
 answered by a human before any `.now.ts` agent code is generated, and it names
@@ -27,42 +32,45 @@ Read first: `now-sdk explain building-ai-agents-guide`.
 
 ## The four gate questions
 
-### Q1 — Authentication: Dynamic User or AI User?
+### Q1 — Authentication: Dynamic User or AI User? — DECIDED: AI User
 
 *Which identity does the agent act as?*
 
-Relevant blueprint constraint: every AI output is advisory and attributed
-(p.11). An **AI User** gives you a distinct, queryable identity in `AuditLog`
-— which fits `actor_type: 'ai'` on the audit table. **Dynamic User** runs as the
-invoking recruiter, which blurs that line.
+**Decided 2026-09-04: AI User.** Gives a distinct, queryable identity in
+`AuditLog` (`actor_type: 'ai'`), separate from whichever recruiter triggered
+it — matches blueprint p.11's "every AI output is advisory and attributed."
 
-**Leaning:** AI User, for attribution. Needs `sys_user` query
-(`identity_type=ai_agent`) to pick one.
+**Still needed before writing agent code:** an actual `sys_user` sys_id with
+`identity_type=ai_agent` to reference. Query the instance for an existing one
+first (`sys_user` where `identity_type=ai_agent`); create one only if none
+exists. This is one of the outstanding prerequisites below — not resolved yet.
 
-### Q2 — Security roles (only if Dynamic User)
+### Q2 — Security roles — N/A, AI User was chosen
 
-Which roles the agent may read data under. Never use `Now.ID` for these —
-resolve real sys_ids from `sys_user_role`. `maint` is not allowed.
+This question only applies to Dynamic User. Since Q1 was decided as AI User,
+the agent's access is governed by whatever roles are granted to the AI User
+`sys_user` record directly (via `sys_user_has_role`, same pattern as the demo
+users in `src/fluent/demo/demo-users.now.ts` — remember `state: 'active'`),
+not by the invoking recruiter's roles. Grant it the minimum surface: read on
+`x_winu_hireme_candidate_profile` and `x_winu_hireme_job_offer`, write on
+`x_winu_hireme_scoring_result`. Nothing else.
 
-Minimum surface the scoring agent needs: read on `x_winu_hireme_candidate_profile`
-and `x_winu_hireme_job_offer`; write on `x_winu_hireme_scoring_result`.
-
-### Q3 — Trigger
+### Q3 — Trigger — DECIDED: pipeline calls the agent, no agent-side trigger
 
 *Manual, record create/update, scheduled, or email?* A condition is mandatory.
 
-Blueprint says (p.05 step 5): scoring fires when the profile is ready.
+**Decided 2026-09-04: the pipeline owns orchestration; the agent has no
+platform-level trigger of its own.** `src/server/glide/pipeline.js` calls the
+scoring agent as one step, the same way it already calls OCR and the
+rule-based parser. This was explicitly chosen over "agent triggers itself on
+CandidateProfile create" specifically to avoid two competing trigger sources
+firing scoring twice — the failure mode the original brief flagged.
 
-**Leaning:** record create on `x_winu_hireme_candidate_profile`. But note the
-blueprint orchestrates via **Flow Designer** (p.04) — so the cleaner design may
-be *no* agent trigger at all, with the flow calling the agent. Decide which owns
-the orchestration; do not build both.
-
-### Q4 — ACL access: who can invoke it?
+### Q4 — ACL access: who can invoke it? — DECIDED: specific roles
 
 Any authenticated user / specific roles / public.
 
-**Leaning:** specific roles — `x_winu_hireme.recruiter` and
+**Decided 2026-09-04: specific roles** — `x_winu_hireme.recruiter` and
 `x_winu_hireme.admin`. The Copilot must never be publicly invokable, and
 candidates must not reach the scoring agent at all (p.11).
 

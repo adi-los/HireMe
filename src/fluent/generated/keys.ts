@@ -77,6 +77,10 @@ declare global {
                         table: 'sys_security_acl'
                         id: '0bd2299a02b54b729fdca586265f0add'
                     }
+                    acl_chat_interaction_create: {
+                        table: 'sys_security_acl'
+                        id: 'cb2d61e50ed64415ba80495ad8cea3e3'
+                    }
                     acl_chat_interaction_read: {
                         table: 'sys_security_acl'
                         id: '14a151958286420ca8d15cb18382c6fc'
@@ -84,6 +88,10 @@ declare global {
                     acl_chat_interaction_write: {
                         table: 'sys_security_acl'
                         id: '1bbf74d846924767a19a2ae487b89f88'
+                    }
+                    acl_copilot_chat: {
+                        table: 'sys_security_acl'
+                        id: 'f44d31c9339440fc9a056e6fe56ea97f'
                     }
                     acl_cv_document_create_public: {
                         table: 'sys_security_acl'
@@ -541,6 +549,18 @@ declare global {
                         table: 'sys_properties'
                         id: '0baa834df9a045db80b5bde37f5f2ee1'
                     }
+                    prop_llm_api_key: {
+                        table: 'sys_properties'
+                        id: 'ef07a014dc004a6483cef93076b1ca72'
+                    }
+                    prop_llm_model: {
+                        table: 'sys_properties'
+                        id: '3f7aed9f3d6c4124b915f7c3ab7434bf'
+                    }
+                    prop_llm_provider: {
+                        table: 'sys_properties'
+                        id: '678997667cd34fb5844753f83dbd6017'
+                    }
                     prop_ocr_callback_token: {
                         table: 'sys_properties'
                         id: '0ae3133e8ea149adb10ea9715d6362f0'
@@ -581,6 +601,14 @@ declare global {
                         table: 'sys_ws_definition'
                         id: '09ee352e6f064ddb8ef553f701130163'
                     }
+                    restapi_copilot_ask: {
+                        table: 'sys_ws_operation'
+                        id: 'd1e9db2ad46b4cf9bb3650e0406f79f1'
+                    }
+                    restapi_copilot_chat: {
+                        table: 'sys_ws_definition'
+                        id: '5455bc80da594551ba1f641be8b0ae6d'
+                    }
                     restapi_ocr_webhook: {
                         table: 'sys_ws_definition'
                         id: 'e7b0ef76ef1c4fe98f295bda23fb4bcf'
@@ -600,6 +628,22 @@ declare global {
                     restapi_portal_status: {
                         table: 'sys_ws_operation'
                         id: '6642d437241d4b30a8f7f41a359d899e'
+                    }
+                    restmsg_llm_hdr_ct: {
+                        table: 'sys_rest_message_fn_headers'
+                        id: 'f98f6e7ee39d4748a1fff264bd4a5650'
+                    }
+                    restmsg_llm_service: {
+                        table: 'sys_rest_message'
+                        id: '63224f3af9d44563bce9cae09d6c02a2'
+                    }
+                    restmsg_llm_var_base: {
+                        table: 'sys_rest_message_fn_parameters'
+                        id: 'ec07dd76107e45dcb0453c186438fb9a'
+                    }
+                    restmsg_llm_var_body: {
+                        table: 'sys_rest_message_fn_parameters'
+                        id: '16ed65ef995e45e7887120310b7dd131'
                     }
                     restmsg_ocr_extract_hdr_cb: {
                         table: 'sys_rest_message_fn_headers'
@@ -645,6 +689,10 @@ declare global {
                         table: 'sys_module'
                         id: '726a7de23ddd461b93bc690b94757eb8'
                     }
+                    'src_server_copilot-prompt_js': {
+                        table: 'sys_module'
+                        id: 'a3e552c5ded64c3b9d4f76b73dd402ee'
+                    }
                     src_server_glide_audit_js: {
                         table: 'sys_module'
                         id: 'ac1d62455e474545af465fc2b9f4a09b'
@@ -653,9 +701,17 @@ declare global {
                         table: 'sys_module'
                         id: '21b64376e62447bb88ca228be3901865'
                     }
+                    src_server_glide_copilot_js: {
+                        table: 'sys_module'
+                        id: 'd51335e8ed594cbc9d7480c0a39b3860'
+                    }
                     src_server_glide_intake_js: {
                         table: 'sys_module'
                         id: 'e8906a940b8f47d7b86895977543965a'
+                    }
+                    'src_server_glide_llm-client_js': {
+                        table: 'sys_module'
+                        id: '1164b341f03741e78885db3388fd34a3'
                     }
                     src_server_glide_ocr_js: {
                         table: 'sys_module'
@@ -684,6 +740,10 @@ declare global {
                     'src_server_rest_candidate-portal_js': {
                         table: 'sys_module'
                         id: 'b2f0a0e822c44617aab0c0ca20137c62'
+                    }
+                    src_server_rest_copilot_js: {
+                        table: 'sys_module'
+                        id: '4512f321a2b44c63abd6b537f15a3a2b'
                     }
                     'src_server_rest_ocr-callback_js': {
                         table: 'sys_module'
@@ -1398,6 +1458,14 @@ declare global {
                             name: 'x_winu_hireme_cv_document'
                             element: 'ocr_status'
                             language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_rest_message_fn'
+                        id: '2b08fb5835db4e1ea29c5fdae2fc34ea'
+                        key: {
+                            rest_message: '63224f3af9d44563bce9cae09d6c02a2'
+                            function_name: 'complete'
                         }
                     },
                     {
@@ -2154,6 +2222,19 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_security_acl_role'
+                        id: '63dd1e11dd01436e9a0d1601bc2c4eca'
+                        key: {
+                            sys_security_acl: 'cb2d61e50ed64415ba80495ad8cea3e3'
+                            sys_user_role: {
+                                id: 'e15ef9cb95c24d45a70ca6a6726a2f17'
+                                key: {
+                                    name: 'x_winu_hireme.recruiter'
+                                }
+                            }
+                        }
+                    },
+                    {
                         table: 'sys_documentation'
                         id: '63edc62bf96e4bf9881462829495568a'
                         key: {
@@ -2808,6 +2889,19 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_security_acl_role'
+                        id: '93d0e0e614c84dd383107f42f16c63fb'
+                        key: {
+                            sys_security_acl: 'f44d31c9339440fc9a056e6fe56ea97f'
+                            sys_user_role: {
+                                id: '8287635526004c119ca1001fdc713f62'
+                                key: {
+                                    name: 'x_winu_hireme.hiring_manager'
+                                }
+                            }
+                        }
+                    },
+                    {
                         table: 'sys_dictionary'
                         id: '95f8a6850338407c91e8c922300e7435'
                         key: {
@@ -2895,6 +2989,19 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_security_acl_role'
+                        id: '9f26a8ff6da1406593b2ff51bb22fba9'
+                        key: {
+                            sys_security_acl: 'cb2d61e50ed64415ba80495ad8cea3e3'
+                            sys_user_role: {
+                                id: '01621851ff6647998e25aefb11bac949'
+                                key: {
+                                    name: 'x_winu_hireme.admin'
+                                }
+                            }
+                        }
+                    },
+                    {
                         table: 'sys_documentation'
                         id: '9f774e8c8302404a9365bacb8d0c37db'
                         key: {
@@ -2972,6 +3079,19 @@ declare global {
                             name: 'x_winu_hireme_kpi_snapshot'
                             element: 'applications_scored'
                             language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_security_acl_role'
+                        id: 'a63c874dc21340eea155db62b0c32220'
+                        key: {
+                            sys_security_acl: 'f44d31c9339440fc9a056e6fe56ea97f'
+                            sys_user_role: {
+                                id: '01621851ff6647998e25aefb11bac949'
+                                key: {
+                                    name: 'x_winu_hireme.admin'
+                                }
+                            }
                         }
                     },
                     {
@@ -3453,6 +3573,19 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_security_acl_role'
+                        id: 'd0348cb1a05044bdab05d3129a2fc069'
+                        key: {
+                            sys_security_acl: 'cb2d61e50ed64415ba80495ad8cea3e3'
+                            sys_user_role: {
+                                id: '8287635526004c119ca1001fdc713f62'
+                                key: {
+                                    name: 'x_winu_hireme.hiring_manager'
+                                }
+                            }
+                        }
+                    },
+                    {
                         table: 'sys_documentation'
                         id: 'd0e21c9150c24cb8a91065081d36273e'
                         key: {
@@ -3598,6 +3731,19 @@ declare global {
                             name: 'x_winu_hireme_cv_document'
                             element: 'ocr_error'
                             language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_security_acl_role'
+                        id: 'd81939dda6374835a6ced997b04a752b'
+                        key: {
+                            sys_security_acl: 'f44d31c9339440fc9a056e6fe56ea97f'
+                            sys_user_role: {
+                                id: 'e15ef9cb95c24d45a70ca6a6726a2f17'
+                                key: {
+                                    name: 'x_winu_hireme.recruiter'
+                                }
+                            }
                         }
                     },
                     {

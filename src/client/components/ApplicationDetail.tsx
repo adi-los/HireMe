@@ -8,6 +8,7 @@ import {
   fetchCvDocumentForApplication,
   fetchProfileForApplication,
 } from "../services/tableApi";
+import CopilotChat from "./CopilotChat";
 
 interface Props {
   applicationId: string;
@@ -92,6 +93,14 @@ export default function ApplicationDetail({ applicationId, onBack }: Props) {
                 </p>
               </>
             )}
+          </Card>
+        </div>
+      )}
+
+      {header && (
+        <div style={{ marginTop: "16px" }}>
+          <Card>
+            <CopilotChat applicationId={applicationId} />
           </Card>
         </div>
       )}

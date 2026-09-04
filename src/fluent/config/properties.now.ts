@@ -56,6 +56,50 @@ Property({
     roles: { read: ['x_winu_hireme.admin'], write: ['x_winu_hireme.admin'] },
 })
 
+/* ---------------- LLM (generic, provider-agnostic) ---------------- */
+// Confirmed on the instance 2026-09-04 (docs/open-questions.md #5): no AI
+// Agent Studio, no sn_generative_ai — there is no native ServiceNow AI here.
+// Scoring/interview/Copilot all reach an external LLM through these three
+// properties + src/fluent/integrations/llm-service.now.ts's RestMessage.
+
+Property({
+    $id: Now.ID['prop_llm_provider'],
+    name: 'x_winu_hireme.llm.provider',
+    type: 'choicelist',
+    // openrouter is the chosen provider (2026-09-04) — confirmed working
+    // against the real API outside this environment before being wired in
+    // here, not guessed. anthropic/openai are kept as options since
+    // llm-client.js already supports their native shapes too.
+    value: 'openrouter',
+    choices: ['openrouter', 'anthropic', 'openai'],
+    description: 'Which LLM API src/server/glide/llm-client.js calls. Empty = AI features disabled everywhere (Copilot, interview generation, LLM-assisted scoring).',
+    roles: { read: ['x_winu_hireme.admin'], write: ['x_winu_hireme.admin'] },
+})
+
+Property({
+    $id: Now.ID['prop_llm_api_key'],
+    name: 'x_winu_hireme.llm.api_key',
+    type: 'password2',
+    value: '',
+    // isPrivate: excluded from update sets/exports so a filled-in key never
+    // gets captured into a trackable artifact. Set this by hand in System
+    // Properties on each environment; never commit a value here.
+    isPrivate: true,
+    description: 'API key for the provider above. Two-way encrypted. Set manually per environment.',
+    roles: { read: ['x_winu_hireme.admin'], write: ['x_winu_hireme.admin'] },
+})
+
+Property({
+    $id: Now.ID['prop_llm_model'],
+    name: 'x_winu_hireme.llm.model',
+    type: 'string',
+    // OpenRouter model slug, verified working (2026-09-04) before being set
+    // as the default here.
+    value: 'meta-llama/llama-3.3-70b-instruct',
+    description: 'Model name/ID for the chosen provider (an OpenRouter model slug, or an Anthropic/OpenAI model string if provider is switched). Empty = llm-client.js\'s built-in default for that provider.',
+    roles: { read: ['x_winu_hireme.admin'], write: ['x_winu_hireme.admin'] },
+})
+
 /* ---------------- Interview ---------------- */
 
 Property({

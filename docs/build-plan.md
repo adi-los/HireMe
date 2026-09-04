@@ -62,13 +62,20 @@ admin to tweak visually. Revisit if that visual-editability matters to you.
 | ✅ | Scoring arithmetic + banding + blending | `src/server/scoring.js`, 8 tests |
 | ✅ | Deterministic criteria matching | `src/server/matching.js` — this is what actually produces the 5 sub-scores today |
 | ✅ | Pipeline wiring | CV → OCR → profile → match → score → category, all the way to `ScoringResult`, fully automated |
-| 🔒 | Scoring Agent (LLM refinement of the 5 sub-scores) | gated on the 4 questions in `ai-agents-brief.md`; `sn_generative_ai.LLMClient` call is written and guarded, just switched off |
-| 🔒 | Interview Agent | same gate — no question generation or answer evaluation exists yet |
-| 🔒 | Copilot skill | same gate — no natural-language grounding exists yet |
+| 🔒 | Scoring Agent (LLM refinement of the 5 sub-scores) | gate cleared 2026-09-04 (see `ai-agents-brief.md`); not built yet — `src/server/glide/llm-client.js` exists and works, scoring just doesn't call it |
+| 🔒 | Interview Agent | gate cleared; not built yet |
+| ✅ | Copilot skill | Built, deployed, verified. See "RH Copilot" below. |
 
 **The app works end to end without any AI Agent Studio license** — matching and
 scoring run on the rule-based engine alone. The agents are a quality upgrade
 layered on top (`scoring.use_llm=true`), not a dependency.
+
+**Neither AI Agent Studio nor `sn_generative_ai` is installed on this
+instance** (confirmed 2026-09-04 by querying `sys_db_object` directly —
+zero `sn_aia_*` and zero `sn_generative_*` tables; see
+`docs/open-questions.md` #5). Every AI feature in this app, including the
+Copilot below, reaches an external LLM (OpenRouter) via `RestMessage`
+instead of a native ServiceNow AI construct.
 
 ---
 
@@ -79,7 +86,7 @@ layered on top (`scoring.use_llm=true`), not a dependency.
 | ✅ | RH Workspace — queue, candidates, job offers, scores, interview sessions, live dashboard — p.12. Deployed and verified end-to-end as an impersonated recruiter (not admin). |
 | ✅ | Action Bar — Accept/Reject/Call/Schedule AI Interview/Add Note, verified end-to-end by impersonation. See below. |
 | ✅ | CV Viewer + Profile — built, deployed, verified by impersonation. Root cause of an earlier runtime crash confirmed and fixed. See below. |
-| ⬜ | Copilot Panel |
+| ✅ | RH Copilot chat panel — built, deployed, verified by impersonation. See below. |
 | ⬜ | Candidate portal pages (job board, apply flow UI) — the backend API for this already exists (`hireme_portal`), only the UI Builder pages are missing |
 | ⬜ | Virtual Agent topic "HireMe Assistant" |
 
@@ -211,6 +218,93 @@ by side exactly as p.12 describes.
 `NowRecordListConnected`, `RelatedLists`, `FormColumnLayout` or
 `FormActionBar` — none of them will render outside an actual Workspace
 shell. Use `tableApi.ts`'s pattern (or extend it) instead.
+
+---
+
+### RH Copilot — built, deployed, and fixed
+
+Chat panel (blueprint p.12) embedded at the bottom of the CV Viewer's detail
+view (`src/client/components/CopilotChat.tsx`), scoped to exactly one
+application — grounded answers about that one candidate, with citations
+back to the field they came from.
+
+**Gate:** the four questions in `ai-agents-brief.md` were answered by the
+user 2026-09-04 before any of this was written (AI User identity, minimum
+role surface, pipeline-owns-orchestration, recruiter/hiring_manager/admin
+only invocation) — not inferred.
+
+**Prerequisite check, done on the instance, not assumed:** neither AI Agent
+Studio nor `sn_generative_ai` is installed here (see `open-questions.md`
+#5). So there is no native ServiceNow AI construct to call — the Copilot
+reaches an external LLM instead:
+
+- `src/fluent/integrations/llm-service.now.ts` — a provider-agnostic
+  `RestMessage`. Only `base_url` and `body` are static Fluent variables;
+  auth headers are set at runtime (`request.setRequestHeader(...)`) because
+  different providers use different header names for their key
+  (`x-api-key` vs `Authorization: Bearer`), and a `RestMessage` function's
+  declared headers only support a dynamic *value*, not a dynamic *name*.
+- `src/server/glide/llm-client.js` — picks the provider from
+  `x_winu_hireme.llm.provider` (`password2` property holds the key) and
+  builds the right request/response shape. **Provider: OpenRouter**,
+  chosen and verified working against the real API (a `curl` call outside
+  this environment) before being wired in — `meta-llama/llama-3.3-70b-instruct`,
+  OpenAI-compatible request shape. Anthropic/OpenAI native shapes are also
+  implemented, so switching provider later is a property change, not a
+  rewrite.
+- `src/server/copilot-prompt.js` — pure, unit-tested (9 tests): builds the
+  grounding context and system prompt, and parses the model's `{answer,
+  citations}` JSON reply, degrading to plain text if the model doesn't
+  follow the format rather than crashing.
+- `src/server/glide/copilot.js` — loads exactly one application's
+  Application/Candidate/JobOffer/CVDocument/CandidateProfile/current
+  ScoringResult, calls the LLM, writes both chat turns to
+  `x_winu_hireme_chat_interaction`, and writes an audit row. No code path
+  here can pull in a second candidate.
+- `src/fluent/integrations/copilot-chat.now.ts` — the REST endpoint,
+  role-gated the same way as the OCR webhook (recruiter/hiring_manager/
+  admin only, never public, never candidate-reachable).
+
+**A real ACL gap this caught:** `x_winu_hireme_chat_interaction` had a
+`write` (update) ACL but no `create` ACL at all. The REST endpoint runs as
+the invoking recruiter's own session (the Scripted REST default, not an
+elevated service account), so every chat turn would have silently 403'd
+under impersonation. Added `acl_chat_interaction_create` for
+recruiter/hiring_manager/admin; `write` (update) stays admin-only —
+append-only, like `ScoringResult`/`AuditLog`.
+
+**A real response-parsing bug this caught:** the first deployed version of
+`copilotApi.ts` read the REST response body directly. ServiceNow wraps
+every Scripted REST response in `{ "result": ... }` on the wire
+(`response.setBody(x)` becomes `{ result: x }`) — `tableApi.ts` already
+accounted for this, `copilotApi.ts` initially didn't, so an error response's
+real message (e.g. "AI is not configured...") never reached the UI, only a
+generic `503` fallback. Found by reading the actual network response during
+impersonated testing, not guessed; fixed by unwrapping `body.result`.
+
+**A real bug the impersonation test itself caught:** the first version of
+`answerRecruiterQuestion` checked `llmClient.isConfigured()` *before*
+writing the recruiter's question to `ChatInteraction` — so with no API key
+set yet (true on this instance), the function returned early and the
+question was never persisted at all. Reloading the page after asking a
+question showed an empty history, which looked exactly like the `create`
+ACL silently failing. It wasn't the ACL — admin hit the identical "empty
+history" result, which an ACL bug couldn't explain since `adminOverrides`
+would have passed either way. The real bug was the write happening after
+the early return. Fixed by writing the question first, unconditionally,
+then checking configuration — this is also better behavior on its own
+terms: a transient LLM failure no longer loses the recruiter's question.
+
+**Verified end-to-end as the impersonated demo recruiter, not just admin:**
+panel renders below the CV/Profile cards; a question submits and persists —
+confirmed by reloading the page and seeing it survive, under the
+recruiter's own session, which is what actually exercises
+`acl_chat_interaction_create` rather than assuming it works; the "AI not
+configured" error path surfaces as a clean inline message instead of a
+blank crash or an opaque 503. The generative answer itself needs
+`x_winu_hireme.llm.api_key` set by an admin in System Properties (provider
+is OpenRouter, already configured) — untested beyond that point since it
+needs a real key, which is the user's step, not Claude's.
 
 ---
 

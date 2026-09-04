@@ -135,15 +135,35 @@ given.
 
 ---
 
-## 5. Is AI Agent Studio licensed on the target instance?
+## 5. Is AI Agent Studio licensed on the target instance? — CONFIRMED: no
 
-`AiAgent` requires SDK ≥ 4.4.0 (we have 4.11.2) **and** an AI Agent Studio
-subscription on the instance. Worth confirming on the PDI before week 5, since
-the whole AI layer (p.16) assumes it.
+**Status: checked directly on the instance, 2026-09-04, not guessed.**
+`sys_db_object` has zero tables starting with `sn_aia` — AI Agent Studio is
+not installed. The documented fallback, `sn_generative_ai.LLMClient`, is
+**also unavailable**: zero `sn_generative_*` tables either. This is a
+ServiceNow University lab instance (`nowlearning-nlinst...`); it appears to
+carry neither AI license.
 
-If it is not available, the fallback is Flow Designer + `sn_generative_ai.LLMClient`
-in a Script Include — same scoring contract, no Agent Studio. The scoring engine
-in `src/server/scoring.js` is deliberately provider-agnostic and works either way.
+Consequence: any "AI" feature (scoring agent, interview agent, chatbot
+Copilot) needs an **external LLM API** reached via `RestMessage`/`RestApi`
+from a Script Include, not a native ServiceNow AI construct. The scoring
+engine in `src/server/scoring.js` is deliberately provider-agnostic and
+already expects this shape — it takes five sub-scores + confidence from
+wherever they come from, native agent or external API call, and does the
+weighting itself either way.
+
+**Provider decided 2026-09-04: OpenRouter.** Verified working outside this
+environment with a real `curl` call before being wired in (`meta-llama/
+llama-3.3-70b-instruct`, OpenAI-compatible request/response shape,
+`Authorization: Bearer` auth). `src/server/glide/llm-client.js` and
+`x_winu_hireme.llm.provider` default to it; Anthropic/OpenAI native shapes
+stay supported as a config swap if the provider ever changes.
+
+**Real constraint this adds:** an external API needs an API key. Per this
+session's standing rule, Claude does not type credentials into any field —
+the user must add the key as a ServiceNow Connection & Credential alias (or
+system property) themselves; Claude can build the `RestMessage` scaffolding
+that references that alias by name.
 
 ---
 

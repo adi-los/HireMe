@@ -72,6 +72,12 @@ export function getScoringOptions() {
 
 export const config = {
     useLlm: () => getBool('x_winu_hireme.scoring.use_llm', false),
+    llmProvider: () => getString('x_winu_hireme.llm.provider', ''),
+    // gs.getProperty() auto-decrypts a password2-type property in server
+    // script context; this is the one property in this file that must never
+    // be logged.
+    llmApiKey: () => getString('x_winu_hireme.llm.api_key', ''),
+    llmModel: () => getString('x_winu_hireme.llm.model', ''),
     ocrEnabled: () => getBool('x_winu_hireme.ocr.enabled', false),
     ocrEndpoint: () => getString('x_winu_hireme.ocr.endpoint', ''),
     ocrCallbackToken: () => getString('x_winu_hireme.ocr.callback_token', ''),
