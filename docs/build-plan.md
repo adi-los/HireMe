@@ -87,7 +87,8 @@ instead of a native ServiceNow AI construct.
 | ✅ | Action Bar — Accept/Reject/Call/Schedule AI Interview/Add Note, verified end-to-end by impersonation. See below. |
 | ✅ | CV Viewer + Profile — built, deployed, verified by impersonation. Root cause of an earlier runtime crash confirmed and fixed. See below. |
 | ✅ | RH Copilot chat panel — built, deployed, verified by impersonation. See below. |
-| ⬜ | Candidate portal pages (job board, apply flow UI) — the backend API for this already exists (`hireme_portal`), only the UI Builder pages are missing |
+| ✅ | Candidate portal — job board + apply-with-CV-upload, built as a Service Portal, deployed, verified as a genuinely anonymous visitor. See below. |
+| ⬜ | Candidate portal: "I'm interested" soft-apply and "My Applications" status-check pages (backend already exists — `hireme_portal/interest` and `/status/{id}` — only these two portal pages are missing) |
 | ⬜ | Virtual Agent topic "HireMe Assistant" |
 
 `now-sdk explain creating-workspaces-guide` covers the workspace API — but
@@ -305,6 +306,91 @@ blank crash or an opaque 503. The generative answer itself needs
 `x_winu_hireme.llm.api_key` set by an admin in System Properties (provider
 is OpenRouter, already configured) — untested beyond that point since it
 needs a real key, which is the user's step, not Claude's.
+
+---
+
+### Candidate Portal — built, deployed, and fixed
+
+Public job board + apply flow (blueprint p.13), reached at
+`/x_winu_hireme?id=x_winu_hireme_jobs`.
+
+**Built as a Service Portal, not another UI Page.** The CV Viewer is an
+internal recruiter tool; this is public and unauthenticated. The SDK's own
+`service-portal-guide` draws that line explicitly ("Service Portal =
+external self-service users, UI Page = internal platform users") — worth
+noting because nothing forces that choice technically, it's purely a
+documented convention this project followed rather than guessed past.
+
+**Structure:** `service-portal/portal.now.ts` (OOTB Coral theme + Stock
+Header, no custom branding, no menu — a two-page job-board→apply flow
+doesn't need top nav), two `SPPage`s (`x_winu_hireme_jobs`,
+`x_winu_hireme_apply`), two `SPWidget`s (Job Board: read-only list of open
+`JobOffer`s; Apply Form: name/email/phone/consent + CV upload). Pre-flight
+uniqueness checks (`now-sdk query` against `sp_portal`/`sp_page`/`sp_widget`)
+ran clean before anything was created, per the guide's mandatory step.
+
+**Widget server scripts don't import `intake.js`.** `Now.include()` inlines
+a file as raw text into a classic (non-ES-module) script field — it can't
+`import` the way a `RestApi` route's `script:` (an actual bundled function
+reference) can. The apply widget's server script duplicates the small slice
+of `intake.js` it needs (candidate lookup/create, Application + CVDocument
+creation) in plain Glide-script form, with a comment explaining why this
+isn't a `import` cleanup opportunity.
+
+**File upload path, deliberately not a second HTTP call:** the file is read
+client-side via `FileReader` (base64), sent inside the same
+`c.server.update()` payload that creates the Candidate/Application, and
+written server-side with `GlideSysAttachment.writeBase64()`. This was chosen
+over multipart-POSTing to the platform's own Attachment API afterward — that
+would need a second public ACL just for `sys_attachment` create, for no
+real benefit over doing it in the one request that already succeeded.
+5MB client-side cap; a `<input type="file">` inline `onchange` (AngularJS
+can't `ng-model` a file input) calls into the controller via
+`angular.element(this).scope().c.onFileChange(...)` — a known Service
+Portal idiom, not invented here.
+
+**A real bug this caught, invisible until tested as a genuinely logged-out
+visitor:** `SPPage.public: true` was set correctly, but the page rendered
+completely empty — `/api/now/sp/page`'s `containers[].columns[].widgets[].widget`
+came back as an object of empty strings (`sys_id: "", template: "", ...`)
+even though the container→row→column→instance→widget chain was intact in
+the database (verified via `now-sdk query`, field by field). The cause:
+`SPWidget.public` is a **separate** field from `SPPage.public`, defaults to
+`false`, and isn't mentioned anywhere in the guide's prose or its own widget
+example — only in the SPWidget API reference, which is where it was found
+after ruling out every data-layer explanation first. Testing this only as
+admin (even impersonating a role) would never have caught it: a page being
+"public" has no admin-bypass angle to hide behind, so this had to be found
+by actually logging out and hitting the URL cold. Fixed by adding
+`public: true` to both `SPWidget()` definitions.
+
+**A second, minor bug also caught by the same test:** the guide's example
+`dynamicTitleStructure: '... ${portal.title}'` interpolation didn't
+substitute — the browser tab literally showed the raw `${portal.title}`
+text. Switched both pages to a plain string instead of chasing the platform
+templating further; low stakes, but a real defect, not assumed away.
+
+**Verified end-to-end as a genuinely anonymous visitor** — logged out of
+the admin session entirely first (impersonation isn't a strong enough test
+here: a public page has no role to impersonate into), then, separately, from
+a completely different browser profile: job board loads and shows the real
+open "Senior Platform Engineer" position; Apply page loads with the job
+pre-filled from the `?job=` URL param; submitted a full application with
+name, email, phone, consent, and a real uploaded file. Confirmed by
+querying the instance directly afterward, not by trusting the UI's success
+message: `Candidate` row created with the right email/phone/consent
+timestamp, `Application` row links the right `Candidate` and `JobOffer`,
+`CVDocument` row has the right file name/MIME type, and the `sys_attachment`
+row exists with the correct size, name, and content type — the actual bytes
+made it through `GlideSysAttachment.writeBase64()`, not just the metadata
+row.
+
+**Deliberately not wired yet:** OCR extraction isn't triggered from the
+apply flow. No OCR provider is configured on this instance
+(`x_winu_hireme.ocr.enabled` is `false` — open-questions.md #4 is still
+open), so there's nothing to call yet; when a provider is picked, add a call
+here mirroring `src/server/glide/ocr.js`'s `requestOcrExtraction`, duplicated
+the same way the rest of this widget's logic is, for the same reason.
 
 ---
 

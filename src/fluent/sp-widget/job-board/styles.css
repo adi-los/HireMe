@@ -1,0 +1,7 @@
+.job-card {
+    padding: 16px 0;
+    margin-bottom: 8px;
+}
+.job-card + .job-card {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}

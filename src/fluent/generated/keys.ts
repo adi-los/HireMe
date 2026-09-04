@@ -669,6 +669,50 @@ declare global {
                         table: 'sys_rest_message_fn_parameters'
                         id: 'e4bdbd13d5ac4a42b1364b0b127e9c77'
                     }
+                    sp_page_apply_col_1: {
+                        table: 'sp_column'
+                        id: '990bab263a9f4deca358f10218cd9a88'
+                    }
+                    sp_page_apply_container_1: {
+                        table: 'sp_container'
+                        id: '18a859b7b5044c7886cf9dc3d3bd329c'
+                    }
+                    sp_page_apply_instance_1: {
+                        table: 'sp_instance'
+                        id: '880c04d97c5e4bc4ae21979f0132691c'
+                    }
+                    sp_page_apply_row_1: {
+                        table: 'sp_row'
+                        id: 'b7ef199a340d437f869ae416058085a1'
+                    }
+                    sp_page_jobs_col_1: {
+                        table: 'sp_column'
+                        id: '45d6b5e05ac348aa87d2e03609f7d095'
+                    }
+                    sp_page_jobs_container_1: {
+                        table: 'sp_container'
+                        id: '574ac4bb3365495bb0f3dd9c0758cea6'
+                    }
+                    sp_page_jobs_instance_1: {
+                        table: 'sp_instance'
+                        id: '9385737076024735adbeee800e74f425'
+                    }
+                    sp_page_jobs_row_1: {
+                        table: 'sp_row'
+                        id: '63502bde45694dde98edcd74debaf2b4'
+                    }
+                    sp_portal_hireme: {
+                        table: 'sp_portal'
+                        id: '813a78b11dae445c9e1daa0f6a0394a0'
+                    }
+                    sp_widget_apply_form: {
+                        table: 'sp_widget'
+                        id: '06db4b3125154cb79381af6b53e77ac0'
+                    }
+                    sp_widget_job_board: {
+                        table: 'sp_widget'
+                        id: 'ab2c7a76f7f849728764017bcf422a23'
+                    }
                     'src_server_business-rules_application-defaults_js': {
                         table: 'sys_module'
                         id: '206f8b7baae243dd88920f10bff6aeea'
@@ -1169,6 +1213,13 @@ declare global {
                             value: 'interviewing'
                             language: 'en'
                             dependent_value: 'NULL'
+                        }
+                    },
+                    {
+                        table: 'sp_page'
+                        id: '18b25f3ef0e6463f94ea8319259dab7f'
+                        key: {
+                            id: 'x_winu_hireme_jobs'
                         }
                     },
                     {
@@ -2968,6 +3019,13 @@ declare global {
                         key: {
                             name: 'x_winu_hireme_candidate_profile'
                             element: 'skills'
+                        }
+                    },
+                    {
+                        table: 'sp_page'
+                        id: '998d68d9aa9d42479b46de9287a08235'
+                        key: {
+                            id: 'x_winu_hireme_apply'
                         }
                     },
                     {

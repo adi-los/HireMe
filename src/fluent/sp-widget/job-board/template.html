@@ -1,0 +1,24 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Open Positions</h3>
+  </div>
+  <div class="panel-body">
+
+    <div class="text-center text-muted" ng-if="!c.data.jobs.length">
+      <i class="fa fa-inbox fa-2x"></i>
+      <p>No open positions right now — check back soon.</p>
+    </div>
+
+    <div ng-repeat="job in c.data.jobs track by job.sys_id" class="job-card">
+      <h4>{{job.title}}</h4>
+      <p class="text-muted">
+        <span ng-if="job.department">{{job.department}}</span>
+        <span ng-if="job.department && job.location"> &middot; </span>
+        <span ng-if="job.location">{{job.location}}</span>
+      </p>
+      <p ng-if="job.description">{{job.description}}</p>
+      <a class="btn btn-primary" href="?id=x_winu_hireme_apply&job={{job.sys_id}}">Apply</a>
+    </div>
+
+  </div>
+</div>

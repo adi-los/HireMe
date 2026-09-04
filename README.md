@@ -103,9 +103,26 @@ instead. The four AI-agent gate questions were answered 2026-09-04
 (see [`docs/ai-agents-brief.md`](docs/ai-agents-brief.md)); the Scoring and
 Interview agents themselves aren't built yet, just the Copilot skill.
 
+The candidate portal (blueprint p.13) is also built and deployed — a public
+job board and apply-with-CV-upload flow at
+`/x_winu_hireme?id=x_winu_hireme_jobs`, built as a Service Portal rather
+than another UI Page (the SDK's own guide draws that line explicitly:
+Service Portal for external self-service users, UI Page for internal
+platform users). Verified as a genuinely anonymous visitor — logged out
+entirely, not just impersonated, since a public page has no role to
+impersonate into — submitting a real application with a real uploaded file
+and confirming via direct table queries that the Candidate, Application,
+CVDocument and the actual `sys_attachment` bytes all landed correctly. That
+pass caught a real bug: `SPWidget.public` defaults to `false` and is a
+separate gate from `SPPage.public`, undocumented outside the API reference
+— a page can be correctly marked public and still render completely empty
+for an anonymous visitor. Full story in
+[`docs/build-plan.md`](docs/build-plan.md).
+
 Not started: the Scoring/Interview agents (LLM refinement layered on top of
-the deterministic engine — optional, not a dependency), candidate portal
-pages, and the Virtual Agent topic.
+the deterministic engine — optional, not a dependency), the candidate
+portal's "I'm interested" and "My Applications" status pages (the backend
+API for both already exists), and the Virtual Agent topic.
 
 Two decisions were made and implemented rather than left open: `Application`
 stays standalone (not `task`-derived), and candidate identity uses a
